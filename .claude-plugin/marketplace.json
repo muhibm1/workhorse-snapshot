@@ -1,0 +1,17 @@
+{
+  "name": "workhorse",
+  "owner": {
+    "name": "Muhammad Muhibullah"
+  },
+  "metadata": {
+    "description": "Local marketplace for the WorkHorse SDLC plugin"
+  },
+  "plugins": [
+    {
+      "name": "workhorse",
+      "source": "./",
+      "description": "Agentic SDLC for forward-deployed engineering with risk-tiered human gates.",
+      "version": "0.3.10"
+    }
+  ]
+}

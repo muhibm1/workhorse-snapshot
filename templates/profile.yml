@@ -1,0 +1,110 @@
+# WorkHorse client profile. Written once at /workhorse:onboard, edited by humans, read by every agent and hook.
+# Every value here is a fact about THIS client. Label anything not verified with "(believed)".
+
+client:
+  name: ""
+  industry: ""                 # e.g. healthcare, fintech, retail, public-sector, logistics
+  engagement_start: ""         # YYYY-MM-DD
+  primary_contact: ""          # role, not personal data
+
+# Autonomy ladder: shadow | assisted | bounded | full. See design doc 4.2. Default bounded.
+autonomy: bounded
+
+stack:
+  languages: []                # e.g. [typescript, python]
+  frameworks: []               # e.g. [nextjs, fastapi]
+  package_manager: ""          # e.g. pnpm, npm, uv, poetry, cargo
+  database: ""                 # e.g. postgres (supabase), mysql, mongodb, none
+  hosting: ""                  # e.g. vercel, aws-ecs, k8s, on-prem
+  ci: ""                       # e.g. github-actions, gitlab-ci, azure-devops, none
+
+# Commands agents run. Each must be a single command that exits non-zero on failure.
+# Leave empty if the project has none; the verifier will report "no check defined".
+commands:
+  install: ""
+  typecheck: ""
+  lint: ""
+  format: ""                   # receives the file path as its last argument if {file} is absent
+  test: ""
+  test_file: ""                # optional; use {file} placeholder, e.g. "npx vitest run {file}"
+  build: ""
+  e2e: ""
+  screenshot: ""               # optional visual check; must write images to a path and exit non-zero on mismatch
+  security_audit: ""           # e.g. "npm audit --audit-level=high"
+
+conventions:
+  default_branch: main
+  branch_prefix: wh/
+  commit_style: conventional   # conventional | plain
+  test_globs:                  # files the fixer may NOT edit during a fix loop
+    - "**/*.test.*"
+    - "**/*.spec.*"
+    - "**/__tests__/**"
+    - "**/tests/**"
+    - "**/test/**"
+  docs_dir: docs
+  style_notes: []              # short bullets the readability reviewer enforces, e.g. "no default exports"
+
+# Paths hooks refuse to edit (deny) or ask before editing (ask). Globs, repo-relative.
+protected_paths:
+  - ".github/workflows/**"
+  - "infra/**"
+  - "**/*.pem"
+  - "**/*.key"
+  - ".env*"
+sensitive_paths:
+  - "**/migrations/**"
+  - "**/auth/**"
+  - "**/payments/**"
+  - "**/billing/**"
+
+# Commands hooks refuse (deny) or ask before running. Substrings, case-insensitive.
+deny_commands:
+  - "git push --force"
+  - "git push -f"
+  - "terraform destroy"
+  - "kubectl delete namespace"
+  - "DROP DATABASE"
+ask_commands:
+  - "terraform apply"
+  - "kubectl apply"
+  - "prisma migrate deploy"
+  - "supabase db push"
+
+# Build phase parallelism. The planner groups file-disjoint tasks into waves; the conductor runs
+# up to max_parallel builders per wave, each in its own worktree. Lower it if the client's
+# machine, CI, or rate limits cannot take 10.
+build:
+  max_parallel: 10
+  wave_merge: rebase          # rebase | merge: how wave branches fold into the change branch
+
+# Environment tiers. The release engineer may act freely in dev, needs G5 for prod.
+environments:
+  dev: { deploy: "", auto: true }
+  staging: { deploy: "", auto: true }
+  prod: { deploy: "", auto: false }
+
+# Compliance. The compliance mapper fills this; humans confirm at G0.
+compliance:
+  regimes: []                  # subset of [gdpr, hipaa, pci-dss, soc2, financial, iso27001]
+  special_categories: []       # data categories present, e.g. [health, financial, biometric, minors]
+  data_residency: ""           # e.g. "EU only", "US only", "none"
+  audit_log_required: false
+  retention_notes: ""
+
+# Risk tier overrides. Paths here force at least the given tier regardless of the classifier.
+tier_floor_paths:
+  3: ["**/migrations/**", "**/payments/**"]
+  2: ["**/auth/**", "**/*.sql", "infra/**"]
+
+# Optional tracker sync. Leave provider empty for repo-only. The repo stays authoritative; the
+# tracker is a one-way mirror so non-engineers can see phase, tier, and what needs a human.
+# Create the database once with /workhorse:sync --setup, then paste its id here.
+tracker:
+  provider: ""                 # notion | ""   (jira and linear are not implemented in v1)
+  database: ""                 # Notion database id, or its exact name
+  sync_artifacts: false        # true only if the client agreed spec text may live in the tracker
+  sync_on: [gate, phase]       # when the conductor syncs: gate changes, phase changes, or both
+
+# Free text the discovery analyst could not fit elsewhere. Kept short.
+notes: ""

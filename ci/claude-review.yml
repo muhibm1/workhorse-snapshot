@@ -1,0 +1,76 @@
+# Headless WorkHorse reviews on every pull request.
+# Copy to .github/workflows/workhorse-review.yml in the client repo. Requires ANTHROPIC_API_KEY
+# in repository secrets and the WorkHorse plugin reachable (a marketplace URL or a vendored
+# copy under .claude/plugins/workhorse from /workhorse:handover --export-workflow).
+#
+# The job asserts its secret exists and fails loudly if not, so a missing key can never
+# produce a silent green run.
+
+name: WorkHorse review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  assert-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if ANTHROPIC_API_KEY is missing
+        env:
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::ANTHROPIC_API_KEY is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+  security-review:
+    needs: assert-secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are running headless in CI. Use the wh-security-reviewer agent's instructions
+            on the diff between origin/${{ github.base_ref }} and HEAD. Post findings as a single
+            PR comment in the agent's report format. Do not edit files.
+          claude_args: >-
+            --plugin-dir .claude/plugins/workhorse
+            --agent wh-security-reviewer
+            --max-turns 40
+            --allowedTools "Read,Glob,Grep,Bash(git *),Bash(npm audit*)"
+            --permission-mode dontAsk
+
+  conformance-review:
+    needs: assert-secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are running headless in CI. Use the wh-conformance-reviewer agent's instructions
+            on the diff between origin/${{ github.base_ref }} and HEAD. Find the change id from
+            the change folder the diff touches:
+            git diff --name-only origin/${{ github.base_ref }}...HEAD -- docs/sdlc
+            and read that change's docs/sdlc/<id>/spec.md. Control state lives in .git/workhorse
+            on the author's machine and is not in the checkout, so do not look for it. Post the
+            report as a PR comment.
+          claude_args: >-
+            --plugin-dir .claude/plugins/workhorse
+            --agent wh-conformance-reviewer
+            --max-turns 30
+            --allowedTools "Read,Glob,Grep,Bash(git *)"
+            --permission-mode dontAsk
