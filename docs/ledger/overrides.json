@@ -1,0 +1,21 @@
+{
+  "workhorse/2026-09-29-studbook-tools-for-designer-and-discovery-analys": {
+    "version": "0.3.12",
+    "note": "Ran on 0.3.12; the date alone would give the range 0.3.11 to 0.4.0.",
+    "source": "CHANGELOG.md, 0.3.13: \"First measured run of 0.3.12 (the Studbook-tools change)\""
+  },
+  "workhorse/2026-09-30-status-shows-gate-age": {
+    "status": "finished",
+    "note": "Merged as pull request #23 without a Ship approval being recorded, so the record stops at Design.",
+    "source": "git log: 5b82be1 \"status shows gate age (#23)\"; docs/continuation-2026-10-08-session-e23e837f-workhorse-0.4.x.md, open item 4"
+  },
+  "wasl/2026-09-20-fix-pre-existing-typecheck-and-build-failure-in-": {
+    "status": "finished",
+    "note": "Merged into v3-integration; the closing rows and retro were written on a branch that was not merged.",
+    "source": "wasl v3-integration: 39aa8de \"fix pre-existing typecheck and build failure in moderationApi (#2)\"; docs/STATUS.md, the proving runs table"
+  },
+  "agentops/2026-10-05-wire-live-anthropic-model-path": {
+    "note": "The run stopped in Build on the Windows machine after the machine move; the live model path was finished by hand outside the pipeline.",
+    "source": "agentops: e014915 \"feat(cli): live model path with a spend guard\"; docs/continuation-2026-10-08-session-e23e837f-workhorse-0.4.x.md"
+  }
+}

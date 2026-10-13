@@ -1,0 +1,12 @@
+{
+  "name": "hello-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tiny Node HTTP service used to smoke-test the WorkHorse plugin.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test",
+    "lint": "node -e \"require('./src/server.js'); console.log('lint: ok (syntax only)')\"",
+    "start": "node src/server.js"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "workhorse-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agentic SDLC plugin for forward-deployed engineering with risk-tiered human gates.",
+  "scripts": {
+    "test": "node hooks/tests/run.js",
+    "validate": "claude plugin validate .",
+    "run": "node scripts/workhorse.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "workhorse": "scripts/workhorse.js"
+  }
+}

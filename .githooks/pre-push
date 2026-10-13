@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Local stand-in for branch protection (GitHub needs Pro for it on a private repo). Runs the fast
+# parts of CI: the plugin's tests, and Paddock's typecheck, lint and unit tests. Not the build,
+# e2e or the Studbook parity gates (slow, or need a live database). It guards this machine only
+# and leaves no record on GitHub. Skip once with `git push --no-verify`.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+echo "pre-push: plugin tests"
+npm test --silent > .git/pre-push-plugin.log 2>&1 || { tail -30 .git/pre-push-plugin.log; echo "pre-push: plugin tests failed; push refused" >&2; exit 1; }
+tail -1 .git/pre-push-plugin.log
+cd desk
+echo "pre-push: desk typecheck"
+npm run --silent typecheck
+echo "pre-push: desk lint"
+npm run --silent lint
+echo "pre-push: desk unit tests"
+NO_COLOR=1 npx vitest run > ../.git/pre-push-vitest.log 2>&1 || { tail -30 ../.git/pre-push-vitest.log; echo "pre-push: unit tests failed; push refused" >&2; exit 1; }
+grep -E "Tests " ../.git/pre-push-vitest.log | tail -1

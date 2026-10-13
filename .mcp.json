@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "studbook": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/studbook-mcp.js"]
+    }
+  }
+}

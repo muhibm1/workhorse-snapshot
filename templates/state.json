@@ -1,0 +1,13 @@
+{
+  "change_id": "",
+  "title": "",
+  "tier": null,
+  "tier_override": null,
+  "phase": "design",
+  "mode": "normal",
+  "worktree": null,
+  "branch": null,
+  "gates": { "G1": "pending", "G2": "pending", "G3": "pending", "G4": "pending", "G5": "pending" },
+  "verification": { "status": "none", "at": null },
+  "updated_at": ""
+}
